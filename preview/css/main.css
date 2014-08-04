@@ -1,0 +1,18 @@
+logo {
+		font-size: 2.75em;
+		font-family: Monospace;
+}
+logo * {
+		position: relative;
+}
+logo > .logo-js,
+logo > .logo-parens {
+		color: #888;
+	   	font-size: 0.7em;
+}
+logo > .logo-js {
+		bottom: -1px;
+}
+logo > .logo-parens {
+	   	bottom: 0.07em;
+}
