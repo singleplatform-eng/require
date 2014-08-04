@@ -8,11 +8,8 @@ logo * {
 logo > .logo-js,
 logo > .logo-parens {
 		color: #888;
-	   	font-size: 0.7em;
-}
-logo > .logo-js {
-		bottom: -1px;
+	   	font-size: 0.75em;
 }
 logo > .logo-parens {
-	   	bottom: 0.07em;
+	   	bottom: 0.1em;
 }
