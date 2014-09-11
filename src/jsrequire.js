@@ -34,12 +34,13 @@
 
             callback(id);
         });
-        wait = require.wait = $LAB.wait;
 
         // this will always be populated on callback, even if the reference
         // to exports gets swapped
         return exports;
-    }
-    wait = require.wait = $LAB.wait;
+    };
+    wait = require.wait = function() {
+        $LAB = $LAB.wait.apply(null,arguments);
+    };
 })();
 
