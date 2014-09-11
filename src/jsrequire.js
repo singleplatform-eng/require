@@ -1,5 +1,5 @@
 (function(){
-    var exportsCache = {}, $LAB;
+    var exportsCache = {};
 
     require = function(id, callback) {
         // Create a reference to the object that should be populated
