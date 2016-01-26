@@ -1,6 +1,6 @@
 /*
     jsrequire.js (require :: Ridiculously simple JavaScript resource loading)
-    v0.1.0 (c) Alexander Sagalovskiy
+    v0.1.1 (c) Alexander Sagalovskiy
     MIT License
     ~~~
     LAB.js (LABjs :: Loading And Blocking JavaScript)
