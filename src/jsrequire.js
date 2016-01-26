@@ -1,21 +1,22 @@
+'use strict';
 (function(){
     var exportsCache = {};
 
-    require = function(id, callback) {
+    window.require = function(id, callback) {
         // Create a reference to the object that should be populated
         var exports = {};
 
-        $LAB = $LAB // always reset the "playhead"
+        window.$LAB = window.$LAB // always reset the "playhead"
         .wait(function(){
-            $COMMONJS_MODULE = {exports:exports}; //window scope
+            window.$COMMONJS_MODULE = {exports:exports};
         })
         .script(id) // assume id is a fully qualified path, for now
         .wait(function(){
             // if cache exists, module already executed
-            var populatedExports = exportsCache[id] || $COMMONJS_MODULE.exports;
+            var populatedExports = exportsCache[id] || window.$COMMONJS_MODULE.exports;
 
             // sanitize gobal var
-            delete $COMMONJS_MODULE;
+            window.$COMMONJS_MODULE = {exports:exports};
 
             // if exports object has been replaced, copy the properties
             // from the new object in the it.
@@ -39,8 +40,10 @@
         // to exports gets swapped
         return exports;
     };
-    wait = require.wait = function() {
-        $LAB = $LAB.wait.apply(null,arguments);
+    window.wait = window.require.wait = function() {
+        window.$LAB = window.$LAB.wait.apply(null,arguments);
+        //ES6
+        //$LAB = $LAB.wait(...arguments);
     };
 })();
 
