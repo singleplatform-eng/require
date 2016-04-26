@@ -31,9 +31,14 @@
             }
 
             // set exports cache
-            if(!exportsCache[id]) exportsCache[id] = exports;
-
-            callback(id);
+            if(!exportsCache[id]) {
+                exportsCache[id] = exports;
+                callback(id);
+            } else {
+                setTimeout(function delayCallback() {
+                    callback(id);
+                }, 0);
+            }
         });
 
         // this will always be populated on callback, even if the reference
