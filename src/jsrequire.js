@@ -1,6 +1,7 @@
 'use strict';
 (function(){
     var exportsCache = {};
+    var callbackQueue = [];
 
     window.require = function(id, callback) {
         // Create a reference to the object that should be populated
@@ -33,22 +34,36 @@
             // set exports cache
             if(!exportsCache[id]) {
                 exportsCache[id] = exports;
-                callback(id);
-            } else {
-                setTimeout(function delayCallback() {
-                    callback(id);
-                }, 0);
             }
+       
+            if (callback) {
+                callbackQueue.push(function executeCallback() {
+                    callback(id);
+                });
+            }
+
+            scheduleCallbackQueueProcessor();
         });
 
         // this will always be populated on callback, even if the reference
         // to exports gets swapped
         return exports;
     };
-    window.wait = window.require.wait = function() {
-        window.$LAB = window.$LAB.wait.apply(null,arguments);
-        //ES6
-        //$LAB = $LAB.wait(...arguments);
+    window.wait = window.require.wait = function(callback) {
+        window.$LAB = window.$LAB.wait(function addCallback() {
+            callbackQueue.push(callback);    
+        });
+
+        scheduleCallbackQueueProcessor();
     };
+
+    function scheduleCallbackQueueProcessor() {
+        setTimeout(function processQueue() {
+            callbackQueue.forEach(function processCallback(callback) {
+                callback();
+            });
+            callbackQueue = [];
+        }, 0);
+    }
 })();
 
