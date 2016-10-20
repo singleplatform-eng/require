@@ -1,17 +1,35 @@
 'use strict';
 (function(){
+    var basePath,
+        scriptVersion;
     var exportsCache = {};
     var callbackQueue = [];
 
     window.require = function(id, callback) {
+        if(!id ) {
+            return false;
+        }
+
         // Create a reference to the object that should be populated
         var exports = {};
+
+        // Only use base path for absolute URLs with no domain 
+        var isAbsolute = ~id.search(/^(\w+:)?\/\//);
+            var isRelToRoot = !isAbsolute && id.charAt(0) === '/';
+
+        if (isRelToRoot && basePath) {
+            id = basePath + id.replace(/^\/+/, '');
+        }
+
+        if (!isAbsolute && scriptVersion) {
+            id = id + '?' + scriptVersion;
+        };
 
         window.$LAB = window.$LAB // always reset the "playhead"
         .wait(function(){
             window.$COMMONJS_MODULE = {exports:exports};
         })
-        .script(id) // assume id is a fully qualified path, for now
+        .script(id)
         .wait(function(){
             // if cache exists, module already executed
             var populatedExports = exportsCache[id] || window.$COMMONJS_MODULE.exports;
@@ -49,13 +67,19 @@
         // to exports gets swapped
         return exports;
     };
-    window.wait = window.require.wait = function(callback) {
+    window.wait = window.require.wait = function wait(callback) {
         window.$LAB = window.$LAB.wait(function addCallback() {
             callbackQueue.push(callback);    
         });
 
         scheduleCallbackQueueProcessor();
     };
+    window.require.setBasePath = function setBasePath(path) {
+        basePath = path.replace(/\/+$/, '') + '/';
+    }
+    window.require.setVersion = function setVersion(ver) {
+        scriptVersion = ver;
+    }
 
     function scheduleCallbackQueueProcessor() {
         setTimeout(function processQueue() {
