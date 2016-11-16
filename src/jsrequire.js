@@ -22,7 +22,7 @@
         }
 
         if (!isAbsolute && scriptVersion) {
-            id = id + '?' + scriptVersion;
+            id = id + '?v=' + scriptVersion;
         };
 
         window.$LAB = window.$LAB // always reset the "playhead"
