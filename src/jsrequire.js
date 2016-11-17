@@ -83,10 +83,11 @@
 
     function scheduleCallbackQueueProcessor() {
         setTimeout(function processQueue() {
-            callbackQueue.forEach(function processCallback(callback) {
+            callbackQueue.forEach(function processCallback(callback, idx) {
+                callbackQueue[idx] = null;
                 callback();
             });
-            callbackQueue = [];
+            callbackQueue = callbackQueue.filter(Boolean);
         }, 0);
     }
 })();
