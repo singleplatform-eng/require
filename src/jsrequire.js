@@ -1,21 +1,28 @@
 'use strict';
-(function(){
+(function() {
     var basePath,
-        scriptVersion;
+        scriptVersion,
+        currentCallbackChain;
     var exportsCache = {};
-    var callbackQueue = [];
+    var nonQueuedRequireIds = {};
+    var callbackChains = []; // FILO
+
+    window.$COMMONJS_MODULE = {exports: {}};
 
     window.require = function(id, callback) {
-        if(!id ) {
+        if (!id) {
             return false;
         }
+
+        currentCallbackChain = [];
+        callbackChains.unshift(currentCallbackChain);
 
         // Create a reference to the object that should be populated
         var exports = {};
 
         // Only use base path for absolute URLs with no domain 
         var isAbsolute = ~id.search(/^(\w+:)?\/\//);
-            var isRelToRoot = !isAbsolute && id.charAt(0) === '/';
+        var isRelToRoot = !isAbsolute && id.charAt(0) === '/';
 
         if (isRelToRoot && basePath) {
             id = basePath + id.replace(/^\/+/, '');
@@ -25,8 +32,9 @@
             id = id + '?v=' + scriptVersion;
         };
 
-        window.$LAB = window.$LAB // always reset the "playhead"
-        .wait(function(){
+        nonQueuedRequireIds[id] = nonQueuedRequireIds[id] + 1 || 1;
+
+        window.$LAB = window.$LAB.wait(function() { // always reset the "playhead"
             window.$COMMONJS_MODULE = {exports:exports};
         })
         .script(id)
@@ -53,25 +61,22 @@
             if(!exportsCache[id]) {
                 exportsCache[id] = exports;
             }
-       
-            if (callback) {
-                callbackQueue.push(function executeCallback() {
-                    callback(id);
-                });
-            }
 
-            scheduleCallbackQueueProcessor();
+            wait(callback, id);
         });
 
         // this will always be populated on callback, even if the reference
         // to exports gets swapped
         return exports;
     };
-    window.wait = window.require.wait = function wait(callback) {
-        window.$LAB = window.$LAB.wait(function addCallback() {
-            callbackQueue.push(callback);    
-        });
-
+    window.wait = window.require.wait = function wait(callback, id) {
+        if (id) {
+            nonQueuedRequireIds[id] --;
+            !nonQueuedRequireIds[id] && delete nonQueuedRequireIds[id];
+        }
+        if (callback) {
+            currentCallbackChain.push(callback);
+        }
         scheduleCallbackQueueProcessor();
     };
     window.require.setBasePath = function setBasePath(path) {
@@ -83,12 +88,19 @@
 
     function scheduleCallbackQueueProcessor() {
         setTimeout(function processQueue() {
-            callbackQueue.forEach(function processCallback(callback, idx) {
-                callbackQueue[idx] = null;
-                callback();
-            });
-            callbackQueue = callbackQueue.filter(Boolean);
+            if (Object.keys(nonQueuedRequireIds).length === 0) {
+                callbackChains.forEach(function processChain(chain, idx) {
+                    chain.forEach(function processCallback(callback) {
+                        if (callback) {
+                            window.$LAB = window.$LAB.wait(callback);
+                        }
+                    });
+                });
+
+                // Reset the execution chains
+                currentCallbackChain = [];
+                callbackChains = [currentCallbackChain];
+            }
         }, 0);
     }
 })();
-
