@@ -2,7 +2,7 @@ require
 =========
 Asynchronous `require()` that is fast and easy to use! This JavaScript loader is based on the super fast and small [LABjs](http://labjs.com/), but functions a lot like Node's require.
 
-##Basic Usage
+## Basic Usage
 ```JavaScript
 require('/path/to/your_script.js', function() {
   GlobalVarDefinedInYourScript.executeFunction();
@@ -23,7 +23,7 @@ wait(function() {
   GlobalVarDefinedInYourScript.executeFunction();
 });  
 ```
-##Requiring Modules
+## Requiring Modules
 Requiring modules couldn't be simpler!
 ```JavaScript
 var YourModule = require('/path/to/your_module.js', function() {
@@ -37,7 +37,7 @@ wait(function() {
   YourModule.executeFunction();
 });  
 ```
-##Defining Modules
+## Defining Modules
 In order to require a module, you must define `module.exports`, just like in Node. The only difference is that you will need to wrap your code in a `function() {}` wrapper to make the scope private, and pass `module` and `exports` arguments into the wrapper:
 ```JavaScript
 (function(module, exports){
